@@ -4,14 +4,18 @@ import * as authMiddleware from "./auth.middleware.js";
 import validate from "../../common/middleware/validate.middleware.js";
 import AdminLoginDto from "./dto/admin-login.dto.js";
 import StudentLoginDto from "./dto/student-login.dto.js";
+import StudentSignupDto from "./dto/student-signup.dto.js";
 
 const router = express.Router();
 
-// Admin login
-router.post("/admin/login", validate(AdminLoginDto), authController.adminLogin);
+// Student signup
+router.post("/student/signup", validate(StudentSignupDto), authController.studentSignup);
 
 // Student login
 router.post("/student/login", validate(StudentLoginDto), authController.studentLogin);
+
+// Admin login
+router.post("/admin/login", validate(AdminLoginDto), authController.adminLogin);
 
 // Example protected routes
 router.get("/me", authMiddleware.authenticate, (req, res) => {

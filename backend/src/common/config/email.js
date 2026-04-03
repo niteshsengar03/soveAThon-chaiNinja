@@ -52,8 +52,18 @@ const sendOrderConfirmationEmail = async (email, order) => {
   );
 };
 
+const sendComplaintNotification = async (email, subject, message) => {
+  await sendEmail(
+    email,
+    subject,
+    `<h2>Complaint Notification</h2>
+     <p>${message}</p>`,
+  );
+};
+
 export {
   sendVerificationEmail,
   sendResetPasswordEmail,
   sendOrderConfirmationEmail,
+  sendComplaintNotification,
 };

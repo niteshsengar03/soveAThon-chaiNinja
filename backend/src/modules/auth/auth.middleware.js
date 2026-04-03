@@ -22,6 +22,7 @@ const authenticate = async (req, res, next) => {
     name: user.name,
     email: user.email,
     regNo: user.regNo,
+    hostelBlock: user.hostelBlock,
   };
   next();
 };
@@ -38,4 +39,22 @@ const allowRoles = (...roles) => {
   };
 };
 
-export { authenticate, allowRoles };
+// Middleware to check if admin has access to specific block
+const allowBlockAccess = (req, res, next) => {
+  // Students can only access their own data
+  if (req.user.role === "STUDENT") {
+    // For student routes, they should only access their own data
+    // This will be checked in the service layer
+    return next();
+  }
+
+  // Admins can only access their assigned block
+  if (req.user.role === "ADMIN") {
+    // Block access will be validated in service layer based on req.user.hostelBlock
+    return next();
+  }
+
+  throw ApiError.forbidden("Access denied");
+};
+
+export { authenticate, allowRoles, allowBlockAccess };

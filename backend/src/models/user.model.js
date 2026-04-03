@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
             },
             unique: true,
             trim: true,
+            sparse: true,
         },
         name: {
             type: String,
@@ -38,19 +39,30 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: function () {
-                return this.role === "ADMIN";
-            },
+            required: [true, "Password is required"],
             minlength: 8,
             select: false,
+        },
+        hostelBlock: {
+            type: String,
+            enum: ["A", "B", "C", "D"],
+            required: [true, "Hostel block is required"],
+        },
+        roomNo: {
+            type: String,
+            trim: true,
+        },
+        messType: {
+            type: String,
+            enum: ["VEG", "NON_VEG"],
         },
     },
     { timestamps: true },
 );
 
-// Hash password before saving (only for ADMIN)
+// Hash password before saving
 userSchema.pre("save", async function () {
-    if (this.role === "ADMIN" && this.isModified("password")) {
+    if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 12);
     }
 });
