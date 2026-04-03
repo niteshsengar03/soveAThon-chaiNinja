@@ -3,6 +3,14 @@ import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
+    regNo: {
+      type: String,
+      required: function () {
+        return this.role === "STUDENT";
+      },
+      unique: true,
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, "Name is required"],
@@ -12,42 +20,44 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: function () {
+        return this.role === "ADMIN";
+      },
       unique: true,
       lowercase: true,
       trim: true,
     },
-    password: {
+    phone: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: 8,
-      select: false,
+      trim: true,
     },
     role: {
       type: String,
-      enum: ["customer", "seller", "admin", "support"],
-      default: "customer",
+      enum: ["STUDENT", "ADMIN"],
+      required: [true, "Role is required"],
     },
-    isVerified: {
-      type: Boolean,
-      default: false,
+    password: {
+      type: String,
+      required: function () {
+        return this.role === "ADMIN";
+      },
+      minlength: 8,
+      select: false,
     },
-    verificationToken: { type: String, select: false },
-    refreshToken: { type: String, select: false },
-    resetPasswordToken: { type: String, select: false },
-    resetPasswordExpires: { type: Date, select: false },
   },
   { timestamps: true },
 );
 
-// Hash password before saving
+// Hash password before saving (only for ADMIN)
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
-  this.password = await bcrypt.hash(this.password, 12);
+  if (this.role === "ADMIN" && this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
+
 
 export default mongoose.model("User", userSchema);

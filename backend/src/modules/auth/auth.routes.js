@@ -1,29 +1,29 @@
-import { Router } from "express";
-import * as controller from "./auth.controller.js";
-import { authenticate } from "./auth.middleware.js";
+import express from "express";
+import * as authController from "./auth.controller.js";
+import * as authMiddleware from "./auth.middleware.js";
 import validate from "../../common/middleware/validate.middleware.js";
-import RegisterDto from "./dto/register.dto.js";
-import LoginDto from "./dto/login.dto.js";
-import ForgotPasswordDto from "./dto/forgot-password.dto.js";
-import ResetPasswordDto from "./dto/reset-password.dto.js";
+import AdminLoginDto from "./dto/admin-login.dto.js";
+import StudentLoginDto from "./dto/student-login.dto.js";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/register", validate(RegisterDto), controller.register);
-router.post("/login", validate(LoginDto), controller.login);
-router.post("/refresh-token", controller.refreshToken);
-router.post("/logout", authenticate, controller.logout);
-router.get("/verify-email/:token", controller.verifyEmail);
-router.post(
-  "/forgot-password",
-  validate(ForgotPasswordDto),
-  controller.forgotPassword,
-);
-router.put(
-  "/reset-password/:token",
-  validate(ResetPasswordDto),
-  controller.resetPassword,
-);
-router.get("/me", authenticate, controller.getMe);
+// Admin login
+router.post("/admin/login", validate(AdminLoginDto), authController.adminLogin);
+
+// Student login
+router.post("/student/login", validate(StudentLoginDto), authController.studentLogin);
+
+// Example protected routes
+router.get("/me", authMiddleware.authenticate, (req, res) => {
+  res.json({ user: req.user });
+});
+
+router.get("/admin-only", authMiddleware.authenticate, authMiddleware.allowRoles("ADMIN"), (req, res) => {
+  res.json({ message: "Admin access granted" });
+});
+
+router.get("/student-only", authMiddleware.authenticate, authMiddleware.allowRoles("STUDENT"), (req, res) => {
+  res.json({ message: "Student access granted" });
+});
 
 export default router;
