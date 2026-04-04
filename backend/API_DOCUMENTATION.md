@@ -783,7 +783,147 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-## 🔧 Utility Endpoints
+## � Broadcast Module
+
+### Broadcast Model
+
+```javascript
+{
+  adminId: ObjectId, // Reference to User
+  block: String, // Required, admin's block
+  content: String, // Required, post text
+  imageUrl: String, // Optional image link
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Create Broadcast Post
+
+**Endpoint:** `POST /api/broadcasts`
+
+**Headers:**
+
+```
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+```
+
+**Body:**
+
+```json
+{
+  "content": "Important maintenance update for your block.",
+  "imageUrl": "https://example.com/image.jpg"
+}
+```
+
+**Authorization:** ADMIN role required
+
+**Process Flow:**
+
+1. Authenticate user via JWT
+2. Validate user is ADMIN
+3. Validate content and optional imageUrl
+4. Save broadcast post with admin's block
+5. Return created broadcast
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "message": "Broadcast created successfully",
+  "data": {
+    "broadcast": {
+      "id": "...",
+      "adminId": "...",
+      "block": "A",
+      "content": "Important maintenance update for your block.",
+      "imageUrl": "https://example.com/image.jpg",
+      "createdAt": "2024-01-01T10:00:00.000Z"
+    }
+  }
+}
+```
+
+---
+
+### Get Admin Broadcasts
+
+**Endpoint:** `GET /api/broadcasts/admin`
+
+**Headers:**
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+
+- `limit` (optional): number of posts to return, default 20
+- `before` (optional): ISO timestamp to fetch older posts before this date
+
+**Authorization:** ADMIN role required
+
+**Process Flow:**
+
+1. Authenticate user via JWT
+2. Validate user is ADMIN
+3. Load broadcasts for admin's block
+4. Sort newest first
+5. Return posts with next cursor
+
+---
+
+### Get Student Broadcast Feed
+
+**Endpoint:** `GET /api/broadcasts`
+
+**Headers:**
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+
+- `limit` (optional): number of posts to return, default 20
+- `before` (optional): ISO timestamp to fetch older posts
+
+**Authorization:** STUDENT role required
+
+**Process Flow:**
+
+1. Authenticate user via JWT
+2. Validate user is STUDENT
+3. Load broadcasts for student's block
+4. Sort newest first
+5. Return posts with next cursor
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Broadcasts retrieved successfully",
+  "data": {
+    "broadcasts": [
+      {
+        "id": "...",
+        "content": "Important maintenance update for your block.",
+        "imageUrl": "https://example.com/image.jpg",
+        "createdAt": "2024-01-01T10:00:00.000Z"
+      }
+    ],
+    "nextCursor": "2024-01-01T09:50:00.000Z"
+  }
+}
+```
+
+---
+
+## �🔧 Utility Endpoints
 
 ### Get Current User Profile
 

@@ -9,7 +9,7 @@ import StudentSignupDto from "./dto/student-signup.dto.js";
 const router = express.Router();
 
 // Student signup
-router.post("/student/signup", validate(StudentSignupDto), authController.studentSignup);
+router.post("/student/signup",validate(StudentSignupDto), authController.studentSignup);
 
 // Student login
 router.post("/student/login", validate(StudentLoginDto), authController.studentLogin);

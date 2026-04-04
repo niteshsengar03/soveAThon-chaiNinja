@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
                 return this.role === "ADMIN";
             },
             unique: true,
+            sparse: true,
             lowercase: true,
             trim: true,
         },
