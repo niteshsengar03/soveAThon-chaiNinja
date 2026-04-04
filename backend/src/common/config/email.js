@@ -2,11 +2,11 @@ import nodemailer from "nodemailer";
 
 // SMTP transporter — works with Mailtrap, Gmail, SendGrid, or any SMTP provider
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: Number(process.env.SMTP_PORT) || 587,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.MAIL_USER || process.env.SMTP_USER,
+    pass: process.env.MAIL_PASSWORD || process.env.SMTP_PASS,
   },
 });
 

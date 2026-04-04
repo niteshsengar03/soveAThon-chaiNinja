@@ -68,6 +68,10 @@ const complaintSchema = new mongoose.Schema(
             },
         ],
         resolvedAt: Date,
+        alertSent: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true },
 );

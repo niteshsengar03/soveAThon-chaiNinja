@@ -38,6 +38,69 @@ CLIENT_URL=http://localhost:3000
 
 ---
 
+## 🐳 Docker Setup
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- Node.js 18+ (for local development)
+
+### Quick Start with Docker
+
+1. **Clone the repository and navigate to backend:**
+
+   ```bash
+   cd backend
+   ```
+
+2. **Start all services (MongoDB + Redis):**
+
+   ```bash
+   docker compose up -d
+   ```
+
+3. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+4. **Create environment file:**
+
+   ```bash
+   cp env.example .env
+   # Edit .env with your configuration
+   ```
+
+5. **Start the application:**
+   ```bash
+   npm run dev
+   ```
+
+### Docker Services
+
+- **MongoDB**: Database on port 27017
+- **Redis**: Queue system on port 6379
+
+### Useful Docker Commands
+
+```bash
+# View running containers
+docker ps
+
+# View logs
+docker logs mongodb
+docker logs redis
+
+# Stop all services
+docker compose down
+
+# Rebuild and restart
+docker compose up --build
+```
+
+---
+
 ## Authentication System
 
 ### User Roles & Permissions
@@ -488,6 +551,53 @@ Authorization: Bearer <jwt_token>
 
 ---
 
+### Get Available Workers for Complaint
+
+**Endpoint:** `GET /api/complaints/available-workers`
+
+**Headers:**
+
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Query Parameters:**
+
+- `category` (required): Complaint category (AC, FAN, ELECTRICITY, etc.)
+- `block` (required): Block where complaint occurred
+
+**Authorization:** ADMIN role required
+
+**Process Flow:**
+
+1. Authenticate user via JWT
+2. Validate user is ADMIN
+3. Find all active workers matching category and block
+4. Return workers list for admin to choose from
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Available workers retrieved successfully",
+  "data": {
+    "workers": [
+      {
+        "id": "...",
+        "name": "John Electrician",
+        "email": "john@workers.com",
+        "phone": "9876543210",
+        "category": "ELECTRICIAN",
+        "block": "A"
+      }
+    ]
+  }
+}
+```
+
+---
+
 ### Get Admin Complaints
 
 **Endpoint:** `GET /api/complaints/admin`
@@ -514,6 +624,35 @@ Authorization: Bearer <jwt_token>
 5. Populate student and worker data
 6. Sort by creation date (newest first)
 7. Return complaints array
+
+---
+
+### Automated Complaint Monitoring
+
+**Background Processing:**
+
+The system includes automated monitoring for resolved complaints:
+
+1. **Daily Check (9:00 AM)**: System checks for complaints in "RESOLVED" status older than 2 days
+2. **Email Alert**: Sends notification to head of hostels if complaint remains resolved for >2 days
+3. **Alert Tracking**: Marks alerts as sent to prevent duplicate notifications
+
+**Email Notifications:**
+
+- **Worker Assignment**: Email sent to worker when complaint is assigned
+- **Resolution Alert**: Email sent to head of hostels for long-resolved complaints
+- **Queue Processing**: All emails processed asynchronously using Redis queue
+
+**Environment Variables for Notifications:**
+
+```env
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Head of Hostels Email
+HEAD_OF_HOSTELS_EMAIL=head@hostel.edu
+```
 
 ---
 

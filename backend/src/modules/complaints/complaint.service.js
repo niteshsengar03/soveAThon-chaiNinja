@@ -2,7 +2,7 @@ import Complaint from "./complaint.model.js";
 import Worker from "../workers/worker.model.js";
 import User from "../../models/user.model.js";
 import ApiError from "../../common/utils/api-error.js";
-import { sendComplaintNotification } from "../../common/config/email.js";
+import { queueNotification } from "../../common/services/notification.service.js";
 
 const createComplaint = async ({
     studentId,
@@ -38,15 +38,20 @@ const createComplaint = async ({
             phone: availableWorkers[0].phone,
         };
 
-        // Send notification email
+        // Queue notification email
         try {
-            await sendComplaintNotification(
-                availableWorkers[0].email,
-                `New ${category} complaint assigned`,
-                `Complaint details: ${description}\nBlock: ${block}\nRoom: ${roomNo}`
-            );
+            await queueNotification('complaint-assigned', {
+                complaintId: complaint._id,
+                workerEmail: availableWorkers[0].email,
+                category,
+                description,
+                block,
+                roomNo,
+                studentName: 'Student', // Will be populated when needed
+                regNo
+            });
         } catch (error) {
-            console.error("Failed to send notification:", error);
+            console.error("Failed to queue notification:", error);
         }
     }
 
@@ -115,15 +120,21 @@ const assignWorker = async ({ complaintId, workerId, adminId }) => {
 
     await complaint.save();
 
-    // Send notification
+    // Queue notification
     try {
-        await sendComplaintNotification(
-            worker.email,
-            `Complaint assigned to you`,
-            `Complaint ID: ${complaintId}\nDescription: ${complaint.description}\nBlock: ${complaint.block}\nRoom: ${complaint.roomNo}`
-        );
+        const student = await User.findById(complaint.studentId);
+        await queueNotification('complaint-assigned', {
+            complaintId: complaint._id,
+            workerEmail: worker.email,
+            category: complaint.category,
+            description: complaint.description,
+            block: complaint.block,
+            roomNo: complaint.roomNo,
+            studentName: student?.name || 'Unknown Student',
+            regNo: complaint.regNo
+        });
     } catch (error) {
-        console.error("Failed to send notification:", error);
+        console.error("Failed to queue notification:", error);
     }
 
     return { success: true };
@@ -191,6 +202,16 @@ const getAllComplaints = async () => {
     return complaints;
 };
 
+const getAvailableWorkers = async (category, block) => {
+    const workers = await Worker.find({
+        category,
+        block,
+        isActive: true,
+    }).select('name email phone category block');
+
+    return workers;
+};
+
 export {
     createComplaint,
     assignWorker,
@@ -198,4 +219,5 @@ export {
     getStudentComplaints,
     getAdminComplaints,
     getAllComplaints,
+    getAvailableWorkers,
 };

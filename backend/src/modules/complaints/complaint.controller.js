@@ -53,6 +53,12 @@ const getAllComplaints = async (req, res) => {
     ApiResponse.ok(res, "All complaints retrieved successfully", { complaints });
 };
 
+const getAvailableWorkers = async (req, res) => {
+    const { category, block } = req.query;
+    const workers = await complaintService.getAvailableWorkers(category, block);
+    ApiResponse.ok(res, "Available workers retrieved successfully", { workers });
+};
+
 export {
     createComplaint,
     assignWorker,
@@ -60,4 +66,5 @@ export {
     getMyComplaints,
     getAdminComplaints,
     getAllComplaints,
+    getAvailableWorkers,
 };

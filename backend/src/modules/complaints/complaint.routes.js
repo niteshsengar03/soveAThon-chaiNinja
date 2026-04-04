@@ -42,6 +42,13 @@ router.get(
     complaintController.getAdminComplaints
 );
 
+// Get available workers for assignment (admins only)
+router.get(
+    "/available-workers",
+    authMiddleware.allowRoles("ADMIN"),
+    complaintController.getAvailableWorkers
+);
+
 // Get all complaints (super admin or for debugging)
 router.get("/all", complaintController.getAllComplaints);
 
