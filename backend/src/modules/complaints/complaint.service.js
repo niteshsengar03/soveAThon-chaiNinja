@@ -97,8 +97,9 @@ const assignWorker = async ({ complaintId, workerId, adminId }) => {
         throw ApiError.notFound("Worker not found");
     }
 
-    // Check if worker is active and matches category/block
-    if (!worker.isActive || worker.category !== complaint.category || worker.block !== complaint.block) {
+    // Check if worker is active and matches category
+    // (Workers don't have block assigned, so we only check active and category)
+    if (!worker.isActive || worker.category !== complaint.category) {
         throw ApiError.badRequest("Invalid worker assignment");
     }
 
@@ -203,9 +204,10 @@ const getAllComplaints = async () => {
 };
 
 const getAvailableWorkers = async (category, block) => {
+    // Return all active workers of the specified category
+    // (Workers don't have block field, so we just match by category and isActive status)
     const workers = await Worker.find({
         category,
-        block,
         isActive: true,
     }).select('name email phone category block');
 

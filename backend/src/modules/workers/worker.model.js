@@ -9,13 +9,12 @@ const workerSchema = new mongoose.Schema(
         },
         category: {
             type: String,
-            enum: ["ELECTRICIAN", "PLUMBER", "CARPENTER", "OTHER"],
+            enum: ["AC", "ELECTRICITY", "FURNITURE", "WASHROOM", "WATER_COOLER"],
             required: [true, "Worker category is required"],
         },
         block: {
             type: String,
-            required: [true, "Block is required"],
-            enum: ["A", "B", "C", "D"],
+            required: false,
         },
         email: {
             type: String,
@@ -26,7 +25,7 @@ const workerSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: [true, "Phone number is required"],
+            required: false,
             trim: true,
         },
         isActive: {
